@@ -1,10 +1,70 @@
 # CDK TypeScript compilation output
-infrastructure/ec2/cdk/**/*.js
-infrastructure/ec2/cdk/**/*.d.ts
-infrastructure/ec2/cdk/node_modules
-infrastructure/ec2/cdk/cdk.out
-infrastructure/ec2/cdk/.cdk.staging
+.cdk.staging
+cdk.out
+*.js
+*.d.ts
 
-# Un-ignore the lib/ directory (override root .gitignore)
-!infrastructure/ec2/cdk/lib/
-!infrastructure/ec2/cdk/lib/**
+# CDK generated files
+cdk.context.json
+outputs.json
+
+# Build artifacts
+bin/
+obj/
+target/
+build/
+node_modules/
+__pycache__/
+*.zip
+
+# Python dependencies
+boto3/
+boto3-*.dist-info/
+botocore/
+botocore-*.dist-info/
+dateutil/
+jmespath/
+jmespath-*.dist-info/
+python_dateutil-*.dist-info/
+s3transfer/
+s3transfer-*.dist-info/
+six-*.dist-info/
+six.py
+urllib3/
+urllib3-*.dist-info/
+
+# Terraform files
+.terraform/
+.terraform.lock.hcl
+terraform.tfstate
+terraform.tfstate.backup
+*.tfvars
+!terraform.tfvars.example
+!java-springboot.tfvars
+!python-flask.tfvars
+!nodejs-express.tfvars
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Parcel default cache directory
+.parcel-cache
+
+# npm
+npm-debug.log*
+.npm
+
+# Yarn
+yarn-error.log
+
+# dotenv environment variables file
+.env
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

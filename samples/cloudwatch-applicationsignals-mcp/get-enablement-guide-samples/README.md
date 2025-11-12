@@ -11,15 +11,13 @@ The testing flow is:
 
 ## Prerequisites
 
-## Platforms
+### General Requirements
+- AWS CLI configured with appropriate credentials
+- Docker and Docker Buildx installed
+- kubectl installed (for EKS deployments)
+- Terraform installed (for Terraform deployments)
 
-### EC2
-
-#### Containerized Deployment (Docker)
-
-Applications run as Docker containers on an EC2 instance, with images pulled from Amazon ECR repos.
-
-##### Build and Push Images to ECR
+### Build and Push Images to ECR
 
 ```shell
 # Navigate to app directory (see table below)
@@ -52,9 +50,11 @@ docker buildx build --platform linux/amd64,linux/arm64 \
 |--------------------|--------------------------|--------------|
 | python-flask       | docker-apps/python/flask | python-flask |
 
-##### Deploy & Cleanup Containerized Infrastructure
+## Deployment Platforms
 
-**Using CDK:**
+### EC2 Deployment
+
+#### Using CDK
 
 ```shell
 cd infrastructure/ec2/cdk
@@ -70,3 +70,80 @@ cdk destroy <stack-name>
 | Language-Framework | Stack Name          |
 |--------------------|---------------------|
 | python-flask       | PythonFlaskCdkStack |
+
+### EKS Deployment
+
+#### Using CDK
+
+```bash
+# Navigate to the CDK directory
+cd infrastructure/eks/cdk
+
+# Install dependencies
+npm install
+
+# Deploy the Python Flask stack
+cdk deploy <stack-name>
+
+# Clean up when done
+cdk destroy <stack-name>
+```
+
+| Language-Framework | Stack Name          |
+|--------------------|---------------------|
+| python-flask       | PythonFlaskEksCdkStack |
+
+#### Using Terraform
+
+##### Deployment Instructions
+
+1. **Navigate to the terraform directory:**
+   ```bash
+   cd infrastructure/eks/terraform
+   ```
+
+2. **Initialize Terraform:**
+   ```bash
+   terraform init
+   ```
+
+3. **Plan the deployment:**
+   ```bash
+   terraform plan -var-file="<var-file>"
+   ```
+
+4. **Deploy the infrastructure:**
+   ```bash
+   terraform apply -var-file="<var-file>"
+   ```
+
+5. **Configure kubectl:**
+   ```bash
+   aws eks update-kubeconfig --region us-east-1 --name python-flask-eks-terraform-cluster
+   ```
+
+6. **Verify deployment:**
+   ```bash
+   kubectl get pods
+   kubectl get services
+   ```
+
+##### Clean Up
+
+```bash
+terraform destroy -var-file="<var-file>"
+```
+
+##### Configuration Reference
+
+| Language-Framework | Variables File              |
+|--------------------|------------------------------|
+| python-flask       | config/python-flask.tfvars  |
+
+## What Gets Deployed
+
+- EKS cluster with Kubernetes 1.30
+- Single t3.medium worker node in public subnets
+- Python Flask application deployment with traffic generator
+- IAM roles with ECR, S3, and SSM permissions
+- Access for Admin and ReadOnly AWS roles

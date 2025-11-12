@@ -1,0 +1,6 @@
+aws_region = "us-west-1"
+app_name = "python-flask-eks"
+image_name = "python-flask"
+port = 5000
+health_check_path = "/health"
+language = "python"
