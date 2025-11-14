@@ -95,9 +95,12 @@ cdk deploy <stack-name>
 cdk destroy <stack-name>
 ```
 
-| Language-Framework | Stack Name          |
-|--------------------|---------------------|
-| python-flask       | PythonFlaskEksCdkStack |
+| Language-Framework | Stack Name                |
+|--------------------|---------------------------|
+| python-flask       | PythonFlaskEksCdkStack    |
+| python-django      | PythonDjangoEksCdkStack   |
+| java-springboot    | JavaSpringBootEksCdkStack |
+| nodejs-express     | NodejsExpressEksCdkStack  |
 
 #### Using Terraform
 
@@ -142,14 +145,9 @@ terraform destroy -var-file="<var-file>"
 
 ##### Configuration Reference
 
-| Language-Framework | Variables File              |
-|--------------------|------------------------------|
-| python-flask       | config/python-flask.tfvars  |
-
-## What Gets Deployed
-
-- EKS cluster with Kubernetes 1.30
-- Single t3.medium worker node in public subnets
-- Python Flask application deployment with traffic generator
-- IAM roles with ECR, S3, and SSM permissions
-- Access for Admin and ReadOnly AWS roles
+| Language-Framework | Variables File                |
+|--------------------|-------------------------------|
+| python-flask       | config/python-flask.tfvars    |
+| python-django      | config/python-django.tfvars   |
+| java-springboot    | config/java-springboot.tfvars |
+| nodejs-express     | config/nodejs-express.tfvars  |

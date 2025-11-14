@@ -95,7 +95,7 @@ resource "aws_eks_cluster" "app_cluster" {
   vpc_config {
     subnet_ids              = data.aws_subnets.public.ids
     endpoint_private_access = true
-    endpoint_public_access  = true
+    endpoint_public_access  = false
   }
 
   depends_on = [
@@ -118,9 +118,47 @@ resource "aws_eks_node_group" "app_nodes" {
 
   instance_types = ["t3.medium"]
 
+  # Launch template for IMDSv2 configuration
+  launch_template {
+    name    = aws_launch_template.node_group_lt.name
+    version = aws_launch_template.node_group_lt.latest_version
+  }
+
   depends_on = [
     aws_iam_role_policy_attachment.node_policy
   ]
+}
+
+# Launch template for EKS node group with IMDSv2 hop limit
+resource "aws_launch_template" "node_group_lt" {
+  name_prefix   = "${var.app_name}-node-group-"
+  image_id      = data.aws_ami.eks_worker.id
+  instance_type = "t3.medium"
+
+  metadata_options {
+    http_endpoint               = "enabled"
+    http_tokens                 = "required"
+    http_put_response_hop_limit = 2
+    instance_metadata_tags      = "disabled"
+  }
+
+  tag_specifications {
+    resource_type = "instance"
+    tags = {
+      Name = "${var.app_name}-node"
+    }
+  }
+}
+
+# Get the latest EKS optimized AMI
+data "aws_ami" "eks_worker" {
+  filter {
+    name   = "name"
+    values = ["amazon-eks-node-1.30-v*"]
+  }
+
+  most_recent = true
+  owners      = ["602401143452"] # Amazon EKS AMI Account ID
 }
 
 # Configure Kubernetes provider
@@ -194,6 +232,13 @@ resource "kubernetes_deployment" "app" {
 
           port {
             container_port = var.port
+          }
+
+          resources {
+            limits = {
+              cpu    = "512m"
+              memory = "1024Mi"
+            }
           }
 
           env {

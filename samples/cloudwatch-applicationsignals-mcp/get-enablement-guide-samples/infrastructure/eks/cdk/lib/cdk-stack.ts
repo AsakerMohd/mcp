@@ -55,17 +55,34 @@ export class EKSAppStack extends cdk.Stack {
       groups: ['system:authenticated'],
     });
 
-    const nodeGroup = cluster.addNodegroupCapacity('DefaultNodeGroup', {
-      instanceTypes: [ec2.InstanceType.of(ec2.InstanceClass.T3, ec2.InstanceSize.MEDIUM)],
-      minSize: 1,
-      maxSize: 1,
-      desiredSize: 1,
-      nodeRole,
-      subnets: {
-        subnetType: ec2.SubnetType.PUBLIC,
-        onePerAz: true,
+    // Create launch template with IMDSv2 hop limit configuration
+    const launchTemplate = new ec2.CfnLaunchTemplate(this, 'NodeGroupLaunchTemplate', {
+      launchTemplateData: {
+        metadataOptions: {
+          httpPutResponseHopLimit: 2,
+          httpTokens: 'required',
+        },
       },
     });
+
+    // Create node group using CfnNodegroup to support launch template
+    const nodeGroup = new eks.CfnNodegroup(this, 'DefaultNodeGroup', {
+      clusterName: cluster.clusterName,
+      nodeRole: nodeRole.roleArn,
+      subnets: vpc.publicSubnets.map(subnet => subnet.subnetId),
+      instanceTypes: ['t3.medium'],
+      scalingConfig: {
+        minSize: 1,
+        maxSize: 1,
+        desiredSize: 1,
+      },
+      launchTemplate: {
+        id: launchTemplate.ref,
+        version: launchTemplate.attrLatestVersionNumber,
+      },
+    });
+
+    nodeGroup.addDependency(cluster.node.defaultChild as cdk.CfnResource);
 
     const deployment = {
       apiVersion: 'apps/v1',

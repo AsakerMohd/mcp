@@ -17,6 +17,9 @@ node_modules/
 __pycache__/
 *.zip
 
+# Un-ignore the lib/ directory for CDK
+!lib/
+
 # Python dependencies
 boto3/
 boto3-*.dist-info/
